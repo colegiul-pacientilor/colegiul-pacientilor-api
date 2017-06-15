@@ -149,7 +149,7 @@ function RepositoryElasticsearchService(client) {
         elasticSearchMessage['@timestamp'] = elasticSearchMessage.creationDate;
 
       this.client.index({
-          index: 'test_index',
+          index: 'cp',
           type: 'case',
           body: elasticSearchMessage,
           refresh: true
