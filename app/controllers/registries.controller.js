@@ -1,3 +1,10 @@
+// TODO
+// setup createdby = current user
+// handle registry states (invalid, deleted/archived, draft)
+//
+
+
+
 const express = require('express'),
   routes = express.Router(),
   Registry = require('../models/registry.model');
@@ -47,7 +54,6 @@ routes.delete('/registries/:id', function (req, res) {
 routes.post('/registries/:id/records', function (req, res) {
   Registry.findById(req.params.id, function (err, registry) {
     registry.records.push({
-      name: req.body.name,
       values: req.body.values
     });
 
