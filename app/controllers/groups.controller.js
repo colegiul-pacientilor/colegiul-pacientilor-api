@@ -32,5 +32,11 @@ routes.get('/groups/:id', function (req, res) {
   });
 });
 
+// Remove Group by id
+routes.delete('/groups/:id', function (req, res) {
+  Group.find({ _id: req.params.id }).remove().exec();
+  res.send({success: true});
+});
+
 
 module.exports = routes;
