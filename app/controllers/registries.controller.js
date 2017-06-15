@@ -4,7 +4,6 @@
 //
 
 
-
 const express = require('express'),
   routes = express.Router(),
   Registry = require('../models/registry.model');
