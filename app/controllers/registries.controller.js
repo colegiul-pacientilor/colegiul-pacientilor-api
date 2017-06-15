@@ -17,7 +17,7 @@ routes.post('/registries', function (req, res) {
     createdBy: req.body.createdBy,
     status: req.body.status,
     fields: req.body.fields,
-    nbrFields : fields.length
+    nbrFields : req.body.fields.length
   });
 
   g.save(function (err) {
@@ -66,6 +66,10 @@ routes.post('/registries/:id/records', function (req, res) {
 
       res.send(registry);
     });
+
+
+   registry.on('es-indexed', function(err,res) {});
+
   });
 });
 
