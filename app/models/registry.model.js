@@ -9,6 +9,7 @@ const RegistrySchema = new Schema({
     description: {type: String},
     createdBy: {type: String},
     creationDate: { type: Date, default: Date.now },
+    version: {type: Number, default: 1 },
     status: {type: String, default: "DRAFT" },
     nbrFields: {type: Number},
     nbrRecords: {type: Number, default: 0 },
