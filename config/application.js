@@ -1,13 +1,15 @@
 const bodyParser = require('body-parser'),
   routes = require('../app/routes'),
-  application = require('../app/controllers/application.controller');
+  application = require('../app/controllers/application.controller'),
+  groups = require('../app/controllers/groups.controller');
 
 module.exports = function (app) {
-  app.use('/', routes);
-  app.use('/', application);
-
   app.use(bodyParser.urlencoded({extended: false})); // Parses urlencoded bodies
   app.use(bodyParser.json());                        // Send JSON responses
+
+  app.use('/', routes);
+  app.use('/', application);
+  app.use('/', groups);
 
   // Enable CORS from client-side
   app.use((req, res, next) => {
