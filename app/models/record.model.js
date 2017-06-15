@@ -5,7 +5,10 @@ const Schema = mongoose.Schema;
 const RecordSchema = new Schema({
 
     id: {type: Number},
-    values: { type: Array }
+    values: { type: Array },
+    createdBy: {type: String, default: "admin" },
+    creationDate: { type: Date, default: Date.now },
+    version: {type: Number, default: 1 }
   },
   {
     timestamps: true

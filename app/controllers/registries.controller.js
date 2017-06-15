@@ -105,16 +105,15 @@ routes.post('/registries/:id/records', function (req, res) {
       values: req.body.values
     });
 
-    registry.nbrRecords++;
-
-      var elastic = new RepositoryElasticsearchService(client);
-      elastic.saveInElastic(req.body, registry._doc.name);
-
+      registry.nbrRecords++;
 
       registry.save(function (err) {
       if (err) {
         res.send({error: true});
       }
+
+      var elastic = new RepositoryElasticsearchService(client);
+      elastic.saveInElastic(req.body, registry._doc.name);
 
       res.send(registry);
     });

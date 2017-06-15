@@ -7,7 +7,7 @@ const RegistrySchema = new Schema({
     id: {type: Number},
     name: {type: String},
     description: {type: String},
-    createdBy: {type: String},
+    createdBy: {type: String, default: "admin" },
     creationDate: { type: Date, default: Date.now },
     version: {type: Number, default: 1 },
     status: {type: String, default: "DRAFT" },
