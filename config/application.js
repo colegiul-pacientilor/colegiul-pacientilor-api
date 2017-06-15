@@ -6,14 +6,6 @@ const bodyParser = require('body-parser'),
   registries = require('../app/controllers/registries.controller');
 
 module.exports = function (app) {
-  app.use(bodyParser.urlencoded({extended: false})); // Parses urlencoded bodies
-  app.use(bodyParser.json());                        // Send JSON responses
-
-  app.use('/', routes);
-  app.use('/', application);
-  app.use('/', groups);
-  app.use('/', users);
-  app.use('/', registries);
 
   // Enable CORS from client-side
   app.use((req, res, next) => {
@@ -23,4 +15,14 @@ module.exports = function (app) {
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
   });
+
+  app.use(bodyParser.urlencoded({extended: false})); // Parses urlencoded bodies
+  app.use(bodyParser.json());                        // Send JSON responses
+
+  app.use('/', routes);
+  app.use('/', application);
+  app.use('/', groups);
+  app.use('/', users);
+  app.use('/', registries);
+
 };
