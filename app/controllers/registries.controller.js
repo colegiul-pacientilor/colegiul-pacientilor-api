@@ -105,17 +105,15 @@ routes.post('/registries/:id/records', function (req, res) {
       values: req.body.values
     });
 
+
     registry.nbrRecords++;
-
-      var elastic = new RepositoryElasticsearchService(client);
-      elastic.saveInElastic(req.body, registry._doc.name);
-
-
       registry.save(function (err) {
-      if (err) {
+          if (err) {
         res.send({error: true});
       }
 
+          var elastic = new RepositoryElasticsearchService(client);
+          elastic.saveInElastic(req.body, registry._doc.name);
       res.send(registry);
     });
 
@@ -144,7 +142,7 @@ function RepositoryElasticsearchService(client) {
 
     this.saveInElastic = function (message, regName) {
       var elasticSearchMessage = this.makeString(message, regName);
-        elasticSearchMessage['@timestamp'] = elasticSearchMessage.creationDate;
+        elasticSearchMessage['@timestamp'] = new Date();
 
       this.client.index({
           index: 'cp',
