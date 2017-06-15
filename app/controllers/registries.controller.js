@@ -9,6 +9,12 @@ const express = require('express'),
   routes = express.Router(),
   Registry = require('../models/registry.model');
 
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+    host: '10.0.177.196:9200',
+    log: 'info'
+});
+
 // Create a registry
 routes.post('/registries', function (req, res) {
   var g = new Registry({
@@ -59,7 +65,11 @@ routes.post('/registries/:id/records', function (req, res) {
 
     registry.nbrRecords++;
 
-    registry.save(function (err) {
+      var elastic = new RepositoryElasticsearchService(client);
+      elastic.saveInElastic(req.body, registry._doc.name);
+
+
+      registry.save(function (err) {
       if (err) {
         res.send({error: true});
       }
@@ -79,5 +89,35 @@ routes.get('/registries/:id/records', function (req, res) {
      res.send(registry);
    });
 });
+
+function RepositoryElasticsearchService(client) {
+
+  this.client = client;
+
+  this.makeString= function(message, regName) {
+      message.registryName = regName;
+      delete message._id;
+      message.records.forEach( function (record) {
+          record.values.forEach( function (item) {
+              message[item.name] = item.value
+          })
+      });
+      return message;
+  };
+
+    this.saveInElastic = function (message, regName) {
+      var elasticSearchMessage = this.makeString(message, regName);
+        elasticSearchMessage['@timestamp'] = elasticSearchMessage.creationDate;
+
+      this.client.index({
+          index: 'test_index',
+          type: 'case',
+          body: elasticSearchMessage,
+          refresh: true
+      });
+  }
+
+}
+
 
 module.exports = routes;
