@@ -9,7 +9,8 @@ routes.post('/registries', function (req, res) {
     description: req.body.description,
     createdBy: req.body.createdBy,
     status: req.body.status,
-    fields: req.body.fields
+    fields: req.body.fields,
+    nbrFields : fields.length
   });
 
   g.save(function (err) {
@@ -43,22 +44,30 @@ routes.delete('/registries/:id', function (req, res) {
 
 
 // Add record to registry
-//routes.post('/registries/:id/record', function (req, res) {
-//  Registry.findById(req.params.id, function (err, registry) {
-//    registry.record.push({
-//      email: req.body.record.email,
-//      firstName: req.body.record.firstName,
-//      lastName: req.body.record.lastName
-//    });
-//
-//    registry.save(function (err) {
-//      if (err) {
-//        res.send({error: true});
-//      }
-//
-//      res.send(registry);
-//    });
-//  });
-//});
+routes.post('/registries/:id/records', function (req, res) {
+  Registry.findById(req.params.id, function (err, registry) {
+    registry.records.push({
+      name: req.body.name,
+      values: req.body.values
+    });
+
+    registry.nbrRecords++;
+
+    registry.save(function (err) {
+      if (err) {
+        res.send({error: true});
+      }
+
+      res.send(registry);
+    });
+  });
+});
+
+// Get all records in a registry
+routes.get('/registries/:id/records', function (req, res) {
+ Registry.findById(req.params.id, function (err, registry) {
+     res.send(registry);
+   });
+});
 
 module.exports = routes;
