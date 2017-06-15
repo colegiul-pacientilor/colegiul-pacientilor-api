@@ -42,9 +42,9 @@ routes.delete('/groups/:id', function (req, res) {
 routes.post('/groups/:id/users', function (req, res) {
   Group.findById(req.params.id, function (err, group) {
     group.users.push({
-      email: req.body.user.email,
-      firstName: req.body.user.firstName,
-      lastName: req.body.user.lastName
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName
     });
 
     group.save(function (err) {
