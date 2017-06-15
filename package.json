@@ -40,6 +40,6 @@
   },
   "devDependencies": {
     "better-npm-run": "0.0.14",
-    "elasticsearchclient": "^0.5.3"
+    "elasticsearch": "^13.1.1"
   }
 }
