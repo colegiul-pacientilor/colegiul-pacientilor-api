@@ -1,6 +1,7 @@
 const express = require('express'),
   routes = express.Router(),
-  Group = require('../models/group.model');
+  Group = require('../models/group.model'),
+  User = require('../models/user.model');
 
 // Create a group
 routes.post('/groups', function (req, res) {
@@ -41,11 +42,14 @@ routes.delete('/groups/:id', function (req, res) {
 // Add user to group
 routes.post('/groups/:id/users', function (req, res) {
   Group.findById(req.params.id, function (err, group) {
-    group.users.push({
-      email: req.body.email,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName
-    });
+
+  var u = new User ({
+                email: req.body.email,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName
+              });
+
+    group.users.push(u);
 
     group.save(function (err) {
       if (err) {
