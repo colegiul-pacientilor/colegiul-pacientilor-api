@@ -12,7 +12,7 @@ const express = require('express'),
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
     host: '10.0.177.196:9200',
-    log: 'info'
+    log: 'trace'
 });
 
 // Create a registry
@@ -136,11 +136,9 @@ function RepositoryElasticsearchService(client) {
   this.makeString= function(message, regName) {
       message.registryName = regName;
       delete message._id;
-      message.records.forEach( function (record) {
-          record.values.forEach( function (item) {
+      message.values.forEach( function (item) {
               message[item.name] = item.value
           })
-      });
       return message;
   };
 
