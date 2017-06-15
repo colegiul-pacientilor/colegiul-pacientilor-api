@@ -1,12 +1,23 @@
 // TODO
-// setup createdby = current user
-// handle registry states (invalid, deleted/archived, draft)
-//
+// 1. setup createdby = current user
+// 2. handle registry states (invalid, deleted/archived, draft)
+// 3. handle version
 
+var multer = require('multer');
+var xlstojson = require("xls-to-json-lc");
+var xlsxtojson = require("xlsx-to-json-lc");
 
 const express = require('express'),
   routes = express.Router(),
-  Registry = require('../models/registry.model');
+  Registry = require('../models/registry.model'),
+  RegistryField = require('../models/registryfield.model'),
+  Record = require('../models/record.model');
+
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+    host: '10.0.177.196:9200',
+    log: 'trace'
+});
 
 // Create a registry
 routes.post('/registries', function (req, res) {
@@ -35,10 +46,21 @@ routes.get('/registries', function (req, res) {
   });
 });
 
+// Search registries
+routes.get('/registries/search', function (req, res) {
+    Registry.find({}, function (err, registries) {
+      res.send(registries);
+    });
+});
+
 // Get registry by id
 routes.get('/registries/:id', function (req, res) {
   Registry.findById(req.params.id, function (err, registry) {
-    res.send(registry);
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.send(registry);
+        }
   });
 });
 
@@ -48,26 +70,60 @@ routes.delete('/registries/:id', function (req, res) {
   res.send({success: true});
 });
 
+// Update a registry by id
+routes.post('/registries/:id', function (req, res) {
+
+//    req.body.version++;
+//
+//    Registry.findOneAndUpdate({_id: req.params.id}, req.body, {upsert:true}, function(err, registry){
+//        if (err) return res.status(500).send(err);
+//        return res.send(registry);
+//    });
+
+  Registry.findById(req.params.id, function (err, registry) {
+
+      // Handle any possible database errors
+      if (err) {
+          res.status(500).send(err);
+      } else {
+
+        registry.name = req.body.name || registry.name;
+        registry.description = req.body.description || registry.description;
+        registry.status = req.body.status || registry.status;
+        registry.fields = req.body.fields || registry.fields;
+        registry.nbrFields = registry.fields.length;
+        registry.version++;
+
+        registry.update();
+
+        res.send(registry);
+      }
+    });
+});
+
 
 // Add record to registry
 routes.post('/registries/:id/records', function (req, res) {
   Registry.findById(req.params.id, function (err, registry) {
-    registry.records.push({
-      values: req.body.values
-    });
 
-    registry.nbrRecords++;
+  var r = new Record({
+              values: req.body.values,
+          });
 
-    registry.save(function (err) {
+    registry.records.push(r);
+
+      registry.nbrRecords++;
+
+      registry.save(function (err) {
       if (err) {
         res.send({error: true});
       }
 
+      var elastic = new RepositoryElasticsearchService(client);
+      elastic.saveInElastic(req.body, registry._doc.name);
+
       res.send(registry);
     });
-
-
-   registry.on('es-indexed', function(err,res) {});
 
   });
 });
@@ -75,8 +131,108 @@ routes.post('/registries/:id/records', function (req, res) {
 // Get all records in a registry
 routes.get('/registries/:id/records', function (req, res) {
  Registry.findById(req.params.id, function (err, registry) {
-     res.send(registry);
+     res.send(registry.records);
    });
 });
+
+function RepositoryElasticsearchService(client) {
+
+  this.client = client;
+
+  this.makeString= function(message, regName) {
+      message.registryName = regName;
+      delete message._id;
+      message.values.forEach( function (item) {
+              message[item.name] = item.value
+          })
+      return message;
+  };
+
+    this.saveInElastic = function (message, regName) {
+      var elasticSearchMessage = this.makeString(message, regName);
+        elasticSearchMessage['@timestamp'] = elasticSearchMessage.creationDate;
+
+      this.client.index({
+          index: 'cp',
+          type: 'case',
+          body: elasticSearchMessage,
+          refresh: true
+      });
+  }
+
+}
+
+var storage = multer.diskStorage({ //multers disk storage settings
+    destination: function (req, file, cb) {
+        cb(null, './uploads/')
+    },
+    filename: function (req, file, cb) {
+        var datetimestamp = Date.now();
+        cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+    }
+});
+
+var upload = multer({ //multer settings
+    storage: storage,
+    fileFilter : function(req, file, callback) { //file filter
+        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
+            return callback(new Error('Wrong extension type'));
+        }
+        callback(null, true);
+    }
+}).single('file');
+
+routes.post('/registries/:id/upload', function(req, res) {
+    var exceltojson;
+    upload(req,res,function(err){
+        if(err){
+            res.json({error_code:1,err_desc:err});
+            return;
+        }
+        /** Multer gives us file info in req.file object */
+        if(!req.file){
+            res.json({error_code:1,err_desc:"No file passed"});
+            return;
+        }
+        /** Check the extension of the incoming file and
+         *  use the appropriate module
+         */
+        if(req.file.originalname.split('.')[req.file.originalname.split('.').length-1] === 'xlsx'){
+            exceltojson = xlsxtojson;
+        } else {
+            exceltojson = xlstojson;
+        }
+        console.log("File " +req.file.originalname+ " was uploaded to following path: " + req.file.path);
+        try {
+            console.log("Trying to parse excel file....");
+            exceltojson({
+                input: req.file.path,
+                output: null, //since we don't need output.json
+                lowerCaseHeaders:true
+            }, function(err,result){
+                if(err) {
+                    return res.json({error_code:1,err_desc:err, data: null});
+                }
+                console.log("HOORAY!!!! Excel file was successfully parsed");
+                console.log("The file contains " + result.length + " cases. Start to create cases");
+
+                Registry.findById(req.params.id, function (err, registry) {
+                    console.log("Registry " + req.params.id + " was found in db");
+                    registry.records.push({
+                        values: result
+                    });
+
+                    res.send(registry);
+                });
+                //res.json({error_code:0,err_desc:null, data: registry});
+            });
+        } catch (e){
+            res.json({error_code:1,err_desc:"Corupted excel file"});
+        }
+    })
+
+});
+
+
 
 module.exports = routes;
