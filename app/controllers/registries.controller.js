@@ -7,7 +7,9 @@
 
 const express = require('express'),
   routes = express.Router(),
-  Registry = require('../models/registry.model');
+  Registry = require('../models/registry.model'),
+  RegistryField = require('../models/registryfield.model'),
+  Record = require('../models/record.model');
 
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
@@ -101,9 +103,12 @@ routes.post('/registries/:id', function (req, res) {
 // Add record to registry
 routes.post('/registries/:id/records', function (req, res) {
   Registry.findById(req.params.id, function (err, registry) {
-    registry.records.push({
-      values: req.body.values
-    });
+
+  var r = new Record({
+              values: req.body.values,
+          });
+
+    registry.records.push(r);
 
       registry.nbrRecords++;
 
@@ -124,7 +129,7 @@ routes.post('/registries/:id/records', function (req, res) {
 // Get all records in a registry
 routes.get('/registries/:id/records', function (req, res) {
  Registry.findById(req.params.id, function (err, registry) {
-     res.send(registry);
+     res.send(registry.records);
    });
 });
 
