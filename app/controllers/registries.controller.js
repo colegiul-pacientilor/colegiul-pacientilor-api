@@ -1,7 +1,7 @@
 // TODO
-// setup createdby = current user
-// handle registry states (invalid, deleted/archived, draft)
-//
+// 1. setup createdby = current user
+// 2. handle registry states (invalid, deleted/archived, draft)
+// 3. handle version
 
 
 
@@ -42,10 +42,21 @@ routes.get('/registries', function (req, res) {
   });
 });
 
+// Search registries
+routes.get('/registries/search', function (req, res) {
+    Registry.find({}, function (err, registries) {
+      res.send(registries);
+    });
+});
+
 // Get registry by id
 routes.get('/registries/:id', function (req, res) {
   Registry.findById(req.params.id, function (err, registry) {
-    res.send(registry);
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.send(registry);
+        }
   });
 });
 
@@ -53,6 +64,37 @@ routes.get('/registries/:id', function (req, res) {
 routes.delete('/registries/:id', function (req, res) {
   Registry.find({_id: req.params.id}).remove().exec();
   res.send({success: true});
+});
+
+// Update a registry by id
+routes.post('/registries/:id', function (req, res) {
+
+//    req.body.version++;
+//
+//    Registry.findOneAndUpdate({_id: req.params.id}, req.body, {upsert:true}, function(err, registry){
+//        if (err) return res.status(500).send(err);
+//        return res.send(registry);
+//    });
+
+  Registry.findById(req.params.id, function (err, registry) {
+
+      // Handle any possible database errors
+      if (err) {
+          res.status(500).send(err);
+      } else {
+
+        registry.name = req.body.name || registry.name;
+        registry.description = req.body.description || registry.description;
+        registry.status = req.body.status || registry.status;
+        registry.fields = req.body.fields || registry.fields;
+        registry.nbrFields = registry.fields.length;
+        registry.version++;
+
+        registry.update();
+
+        res.send(registry);
+      }
+    });
 });
 
 
@@ -76,9 +118,6 @@ routes.post('/registries/:id/records', function (req, res) {
 
       res.send(registry);
     });
-
-
-   registry.on('es-indexed', function(err,res) {});
 
   });
 });
