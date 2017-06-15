@@ -14,19 +14,22 @@
           "id": 1,
           "name": "firstName",
           "type": "String",
-          "active": true
-        },
-        {
-          "id": 3,
-          "name": "cnp",
-          "type": "String",
-          "active": true
+          "active": true,
+          "order": 1
         },
         {
           "id": 2,
+          "name": "cnp",
+          "type": "String",
+          "active": true,
+          "order": 2
+        },
+        {
+          "id": 3,
           "name": "lastName",
           "type": "String",
-          "active": false
+          "active": false,
+          "order": 3
         }
       ],
       "cases": [
@@ -34,7 +37,13 @@
           "id": 1,
           "firstName": "First name",
           "lastname": "Last name",
-          "cnp": 123456
+          "cnp": 123456,
+        },
+        {
+          "id": 2,
+          "firstName": "First name",
+          "lastname": "Last name",
+          "cnp": 123456,
         }
       ]
     }
