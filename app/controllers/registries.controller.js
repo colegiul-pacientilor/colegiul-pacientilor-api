@@ -36,7 +36,11 @@ routes.post('/registries', function (req, res) {
                 reg_type: entry.reg_type,
                 active: entry.active,
                 mandatory: entry.mandatory,
-                type : entry.type
+                type : entry.type,
+                length : entry.length,
+                min : entry.min,
+                max : entry.max,
+                values : entry.values
             });
             g.fields.push(rf);
         });
@@ -114,7 +118,11 @@ routes.post('/registries/:id', function (req, res) {
                     reg_type: entry.reg_type,
                     active: entry.active,
                     mandatory: entry.mandatory,
-                    type : entry.type
+                    type : entry.type,
+                    length : entry.length,
+                    min : entry.min,
+                    max : entry.max,
+                    values : entry.values
                 });
                 g.fields.push(rf);
             });
