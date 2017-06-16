@@ -3,9 +3,9 @@ const express = require('express'),
       sendSMS = require('../helpers/sendSMS.helper');
 
 routes.post('/login', function(req, res) {
-  sendSMS(req.body.sms);
-
-  res.send({});
+  sendSMS(req.body.sms, function(sms) {
+    res.send(sms);
+  });
 });
 
 module.exports = routes;

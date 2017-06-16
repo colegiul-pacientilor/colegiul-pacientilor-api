@@ -1,22 +1,19 @@
 const request = require('request');
 
-function sendSMS(sms) {
-  var headers = {
-    'User-Agent':       'ColegiulPacientilor/API',
-    'Content-Type':     'application/json'
-  };
+function sendSMS(sms, callback) {
 
   var options = {
     url: 'http://localhost:3002/send',
     method: 'POST',
-    headers: headers,
-    body: sms
+    json: sms
   };
 
   request(options, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       console.log(body);
     }
+
+    callback(body);
   });
 }
 
