@@ -28,18 +28,20 @@ routes.post('/registries', function (req, res) {
     status: req.body.status
     });
 
-    req.body.fields.forEach(function(entry) {
-        var rf = new RegistryField({
-            label: entry.label,
-            description: entry.description,
-            reg_type: entry.reg_type,
-            active: entry.active,
-            mandatory: entry.mandatory,
-            type : entry.type
+    if (req.body.fields) {
+        req.body.fields.forEach(function(entry) {
+            var rf = new RegistryField({
+                label: entry.label,
+                description: entry.description,
+                reg_type: entry.reg_type,
+                active: entry.active,
+                mandatory: entry.mandatory,
+                type : entry.type
+            });
+            g.fields.push(rf);
         });
-        g.fields.push(rf);
-    });
-    g.nbrFields = g.fields.length;
+        g.nbrFields = g.fields.length;
+    }
 
 
   g.save(function (err) {
@@ -102,9 +104,22 @@ routes.post('/registries/:id', function (req, res) {
         registry.name = req.body.name || registry.name;
         registry.description = req.body.description || registry.description;
         registry.status = req.body.status || registry.status;
-        registry.fields = req.body.fields || registry.fields;//FIXME
-        registry.nbrFields.length = registry.fields.length;
         registry.version++;
+
+        if (req.body.fields) {
+            req.body.fields.forEach(function(entry) {
+                var rf = new RegistryField({
+                    label: entry.label,
+                    description: entry.description,
+                    reg_type: entry.reg_type,
+                    active: entry.active,
+                    mandatory: entry.mandatory,
+                    type : entry.type
+                });
+                g.fields.push(rf);
+            });
+            g.nbrFields = g.fields.length;
+        }
 
         registry.update();
 
