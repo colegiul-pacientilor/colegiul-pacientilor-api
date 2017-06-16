@@ -7,11 +7,14 @@ const RegistryFieldSchema = new Schema({
     id: {type: Number},
     label: {type: String},
     description: {type: String},
-    reg_type: {type: Number, enum: [1, 2]},
-    creationDate: { type: Date, default: Date.now },
+    reg_type: {type: String},
     active: {type: Boolean, default: true },
     mandatory: {type: Boolean, default: true },
-    type : {type: String}
+    type : {type: String},
+    length : {type: String},
+    min : {type: Number},
+    max : {type: Number},
+    values : {type: Array}
   },
   {
     timestamps: true

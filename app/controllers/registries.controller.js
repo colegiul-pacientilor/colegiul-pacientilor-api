@@ -26,9 +26,29 @@ routes.post('/registries', function (req, res) {
     description: req.body.description,
     createdBy: req.body.createdBy,
     status: req.body.status,
-    fields: req.body.fields,
-    nbrFields : req.body.fields.length
-  });
+    fields : req.body.fields || registry.fields
+    });
+
+g.nbrFields = g.fields.length;
+//    if (req.body.fields) {
+//        req.body.fields.forEach(function(entry) {
+//            var rf = new RegistryField({
+//                label: entry.label,
+//                description: entry.description,
+//                reg_type: entry.reg_type,
+//                active: entry.active,
+//                mandatory: entry.mandatory,
+//                type : entry.type,
+//                length : entry.length,
+//                min : entry.min,
+//                max : entry.max,
+//                values : entry.values
+//            });
+//            g.fields.push(rf);
+//        });
+//        g.nbrFields = g.fields.length;
+//    }
+
 
   g.save(function (err) {
     if (err) {
@@ -90,9 +110,29 @@ routes.post('/registries/:id', function (req, res) {
         registry.name = req.body.name || registry.name;
         registry.description = req.body.description || registry.description;
         registry.status = req.body.status || registry.status;
+        registry.version++;
+
         registry.fields = req.body.fields || registry.fields;
         registry.nbrFields = registry.fields.length;
-        registry.version++;
+
+//        if (req.body.fields) {
+//            req.body.fields.forEach(function(entry) {
+//                var rf = new RegistryField({
+//                    label: entry.label,
+//                    description: entry.description,
+//                    reg_type: entry.reg_type,
+//                    active: entry.active,
+//                    mandatory: entry.mandatory,
+//                    type : entry.type,
+//                    length : entry.length,
+//                    min : entry.min,
+//                    max : entry.max,
+//                    values : entry.values
+//                });
+//                g.fields.push(rf);
+//            });
+//            registry.nbrFields = g.fields.length;
+//        }
 
         registry.update();
 

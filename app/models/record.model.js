@@ -8,7 +8,7 @@ const RecordSchema = new Schema({
     values: { type: Array },
     createdBy: {type: String, default: "admin" },
     creationDate: { type: Date, default: Date.now },
-    status: {type: String, default: "ACTIVE" },
+    status: {type: String, default: "OPEN" },
     version: {type: Number, default: 1 }
   },
   {
