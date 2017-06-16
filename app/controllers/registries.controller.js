@@ -182,6 +182,7 @@ function RepositoryElasticsearchService(client) {
   this.makeString= function(message, regName) {
       message.registryName = regName;
       delete message._id;
+      message.name = new Date()
       message.values.forEach( function (item) {
               message[item.name] = item.value
           })
@@ -190,7 +191,7 @@ function RepositoryElasticsearchService(client) {
 
     this.saveInElastic = function (message, regName) {
       var elasticSearchMessage = this.makeString(message, regName);
-        elasticSearchMessage['@timestamp'] = elasticSearchMessage.creationDate;
+        elasticSearchMessage['@timestamp'] =new Date();
 
       this.client.index({
           index: 'cp',
