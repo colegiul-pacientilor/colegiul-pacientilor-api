@@ -3,7 +3,7 @@
 // 2. handle registry states (invalid, deleted/archived, draft)
 // 3. handle version
 
-var multer = require('multer');
+var multer =require('multer');
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
 
