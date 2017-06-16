@@ -258,11 +258,34 @@ routes.post('/registries/:id/upload', function(req, res) {
 
                 Registry.findById(req.params.id, function (err, registry) {
                     console.log("Registry " + req.params.id + " was found in db");
-                    registry.records.push({
-                        values: result
+
+                    result.forEach( function (record) {
+                        //console.log("Record from excel " + record.stringify );
+                        var valuesArray = [];
+                        for(var i in record){
+                            var key = i;
+                            var val = record[i];
+                            var newObj = {name: key, value: val}
+                            valuesArray.push(newObj);
+                            //console.log("key: " +i + " value: " + val );
+                        }
+
+                        var r = new Record({
+                            values: valuesArray
+                        });
+                       // console.log("Record mongodb object " + r.stringify );
+                        registry.records.push(r);
                     });
 
-                    res.send(registry);
+                    registry.save(function (err) {
+                        if (err) {
+                            res.send({error: true});
+                        }
+                        console.log("Registry saved. Records imported! YAY!!!");
+                        res.send(registry);
+                    });
+
+                    //res.send({'answer' : "completed"});
                 });
                 //res.json({error_code:0,err_desc:null, data: registry});
             });
